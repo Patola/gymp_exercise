@@ -103,7 +103,7 @@ class Pilot:
         tmp_pilot=None
         try:
             tmp_pilot = Pilot._all_pilots[code + " - " + name]
-        catch KeyError:
+        except KeyError:
             tmp_pilot=None
         return tmp_pilot
 
