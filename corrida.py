@@ -100,7 +100,12 @@ class Pilot:
 
     @classmethod
     def get_pilot(cls, code, name):
-        return Pilot._all_pilots[code + " - " + name]
+        tmp_pilot=None
+        try:
+            tmp_pilot = Pilot._all_pilots[code + " - " + name]
+        catch KeyError:
+            tmp_pilot=None
+        return tmp_pilot
 
     @classmethod
     def all_pilots(cls):
@@ -185,9 +190,11 @@ def kartparser():
         if elements[0] is None:
             print(f'Invalid line: ' + fline)
         else:
-            pilot=Pilot.find_pilot(elements[1], elements[2]) # code, name
+            pilot=Pilot.get_pilot(elements[1], elements[2]) # code, name
             if pilot is None:
                 pilot=Pilot(elements[1], elements[2]) # New pilot
+            pilot.add_lap(elements[0], elements[3],
+                elements[4], elements[5])
 
     # Finished race. Let's update positions, best lap time, total race duration.
     Pilot.update_finished()
