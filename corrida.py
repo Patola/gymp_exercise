@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 """ Log Parser for Kart races """
 
-Class Pilot:
+class Pilot:
     nowPrefix=datetime.now().strftime("%Y-%m-%d") # this prefix will be fixed since class is declared
     _all_pilots={} # we need to track our instances. A data dictionary keyed by code + name is ideal for this
                    # "_" prefix means it's a protected class variable.
@@ -30,7 +30,7 @@ Class Pilot:
         self.average_speed=0.0
         self.valid = False
         self.Finished = True
-        _all_pilots[self.code + " - " + self.name]=self # so that we can find by code and name
+        Pilot._all_pilots[self.code + " - " + self.name]=self # so that we can find by code and name
         return self
 
     def add_lap(self, lap_hour, lap_number, lap_duration, average_lap_speed):
@@ -64,16 +64,16 @@ Class Pilot:
     def update_finished(cls):
         # first, let's order them by total_time and substitute the dictionary!
         # python 3 guarantess order of inclusion of dicts with OrderedDict
-        if _all_pilots == {}:
+        if Pilot._all_pilots == {}:
             print(f'No elements in list')
             return False
-        _all_pilots=OrderedDict(sorted(_all_pilots.items(), key=lambda x: x[1].position))
+        Pilot._all_pilots=OrderedDict(sorted(Pilot._all_pilots.items(), key=lambda x: x[1].position))
         pos_tmp=1
         pilot = None
         firstpilot = None
-        for pilot in _all_pilots:
+        for pilot in Pilot._all_pilots:
             pilot.position=pos_tmp
-            if pilot.position = 1:
+            if pilot.position == 1:
                 firstpilot = pilot
             pos_tmp = pos_tmp + 1
             if pilot.best_lap_time < _best_overall_lap:
@@ -100,11 +100,11 @@ Class Pilot:
 
     @classmethod
     def get_pilot(cls, code, name):
-        return _all_pilots[code + " - " + name]
+        return Pilot._all_pilots[code + " - " + name]
 
     @classmethod
     def all_pilots(cls):
-        return _all_pilots.values()
+        return Pilot._all_pilots.values()
 
     @classmethod
     def best_lap(cls):
@@ -128,7 +128,14 @@ def parse_line(fline):
     # second condition for len > 2 prevents an index error in the next one
     if len(elements) != 7 or (len(elements)>2 and elements[2]!="-"):
         return [None,'','','',0,timedelta(0),0.0]
-
+    return [
+        datetime.strptime(nowPrefix+" " + elements[0],'%Y-%m-%d %H:%M:%S.%f'),
+        elements[1],
+        elements[3],
+        int(elements[4]),
+        timedelta(minutes=int(elements[5].split(":")[0]), seconds=float(elements[5].split(":")[1])),
+        float(elements[6].split(",")[0] + "." + elements[6].split(",")[1])
+    ];
 """
     6 output fields:
     0 - time of lap, None if line is invalid
@@ -138,14 +145,6 @@ def parse_line(fline):
     4 - time of lap, MM:SS.FFF
     5 - average speed, float with commas
 """
-    return [
-        datetime.strptime(nowPrefix+" " + elements[0],'%Y-%m-%d %H:%M:%S.%f'),
-        elements[1],
-        elements[3],
-        int(elements[4]),
-        timedelta(minutes=int(elements[5].split(":")[0]), seconds=float(elements[5].split(":")[1])),
-        float(elements[6].split(",")[0] + "." + elements[6].split(",")[1])
-    ];
 
     
 def parse_date(datestring):
@@ -180,6 +179,7 @@ def kartparser():
     f.readline()
 
     # main loop for gobbling up data and setting up pilots
+    fline=""
     while fline in f.readlines():
         elements=parse_line(fline)
         if elements[0] is None:
@@ -194,9 +194,9 @@ def kartparser():
 
     print(f'Hora de chegada\t\tCódigo\tNome\tVoltas\tMelhor Volta\tVelocidade Média Total\tTempo Total')
     for pilot in Pilot.all_pilots():
-        print(strftime(pilot.end_time,'%H:%M:%S.%f') + '\t\t' + pilot.code + '\t' + pilot.name + '\t' + pilot.max_lap + '\t'
+        print(strftime(pilot.end_time,'%H:%M:%S.%f') + '\t\t' + pilot.code + '\t' + pilot.name + '\t' + pilot.max_lap + '\t' +
               pilot.best_lap_time + '\t' + pilot.average_speed + '\t' + pilot.total_time)
-    print(f'\n\nStatistics:\n'):
+    print(f'\n\nStatistics:\n')
     print(f'Melhor tempo de volta: ' + Pilot.best_lap())
     print(f'Tempo total da corrida: ' + Pilot.total_time())
 
