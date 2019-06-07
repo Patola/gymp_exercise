@@ -76,27 +76,27 @@ class Pilot:
             if pilot.position == 1:
                 firstpilot = pilot
             pos_tmp = pos_tmp + 1
-            if pilot.best_lap_time < _best_overall_lap:
-                _best_overall_lap = pilot.best_lap_time
+            if pilot.best_lap_time < Pilot._best_overall_lap:
+                Pilot._best_overall_lap = pilot.best_lap_time
             pilot.time_dif_first_place = pilot.total_time - firstpilot.total_time
             pilot.Finished = True
             pilot.end_time = lap_hour
-        _total_race_time = pilot.total_time # pilot is the last pilot from the loop
+        Pilot._total_race_time = pilot.total_time # pilot is the last pilot from the loop
         return True
 
     @classmethod
     def best_lap_time(cls):
-        if _best_overall_lap != timedelta.max:
-            return _best_overall_lap
+        if Pilot._best_overall_lap != timedelta.max:
+            return Pilot._best_overall_lap
         else:
             print(f'Best lap time not yet calculated, run Pilot.update_finished()')
             return timedelta(0)
 
     @classmethod
     def total_time(cls):
-        if _total_race_time == timedelta(0):
+        if Pilot._total_race_time == timedelta(0):
             print(f'Total race time not yet calculated, run Pilot.update_finished()')
-        return _total_race_time
+        return Pilot._total_race_time
 
     @classmethod
     def get_pilot(cls, code, name):
@@ -108,11 +108,11 @@ class Pilot:
 
     @classmethod
     def best_lap(cls):
-        return _best_overall_lap
+        return Pilot._best_overall_lap
 
     @classmethod
     def total_time(cls):
-        return _total_race_time
+        return Pilot._total_race_time
 
 def parse_line(fline):
     """
@@ -197,8 +197,8 @@ def kartparser():
         print(strftime(pilot.end_time,'%H:%M:%S.%f') + '\t\t' + pilot.code + '\t' + pilot.name + '\t' + pilot.max_lap + '\t' +
               pilot.best_lap_time + '\t' + pilot.average_speed + '\t' + pilot.total_time)
     print(f'\n\nStatistics:\n')
-    print(f'Melhor tempo de volta: ' + Pilot.best_lap())
-    print(f'Tempo total da corrida: ' + Pilot.total_time())
+    print(f'Melhor tempo de volta: ' + str(Pilot.best_lap()))
+    print(f'Tempo total da corrida: ' + str(Pilot.total_time()))
 
 
 if __name__ == "__main__":
