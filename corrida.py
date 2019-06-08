@@ -8,7 +8,7 @@ from collections import OrderedDict
 """ Log Parser for Kart races """
 
 class Pilot:
-    nowPrefix=datetime.now().strftime("%Y-%m-%d")  # this prefix will be fixed since class is declared
+    nowPrefix="2019-01-01"  # this prefix will be fixed since class is declared
     _all_pilots = {}  # we need to track our instances. A data dictionary keyed by code + name is ideal for this
 
     _maximum_lap = 4  # race will finish when max_lap get to this number
@@ -139,7 +139,7 @@ def parse_line(fline):
     >>> parse_line("")
     [None, '', '', '', 0, datetime.timedelta(0), 0.0]
     >>> parse_line("23:49:08.277      038 - F.MASSA                           1            1:02.852                        44,275")
-    [datetime.datetime(2019, 6, 7, 23, 49, 8, 277000), '038', 'F.MASSA', 1, datetime.timedelta(0, 62, 852000), 44.275]
+    [datetime.datetime(2019, 1, 1, 23, 49, 8, 277000), '038', 'F.MASSA', 1, datetime.timedelta(0, 62, 852000), 44.275]
     """
     elements=fline.split()
 
@@ -215,9 +215,10 @@ def kartparser():
 
     print(f'Posição\tHora de chegada\t\tCódigo\tNome\t\t\tVoltas\tMelhor Volta\tVelocidade Média Total\tTempo Total')
     for pilot in Pilot.all_pilots():
-        print( str(pilot.position) + "\t" + datetime.strftime(pilot.end_time,'%H:%M:%S.%f')[0:12] + '\t\t' + pilot.code + '\t' + \
-            pilot.name.ljust(20) + '\t' + str(pilot.max_lap) + '\t' +  \
-            str(pilot.best_lap_time)[2:10] + '\t' + "{:.2f}".format(pilot.average_speed) + \
+        print( (str(pilot.position) if pilot.finished else "-") + "\t" + \
+            datetime.strftime(pilot.end_time,'%H:%M:%S.%f')[0:12] + \
+            '\t\t' + pilot.code + '\t' + \ pilot.name.ljust(20) + '\t' + str(pilot.max_lap) + \
+            '\t' + str(pilot.best_lap_time)[2:10] + '\t' + "{:.2f}".format(pilot.average_speed) + \
             '\t\t\t' + str(pilot.total_time)[2:10])
     print(f'\n\nEstatísticas:\n')
     print(f'Melhor tempo de volta: ' + str(Pilot.best_lap())[2:10])
