@@ -16,6 +16,10 @@ class Pilot:
     _total_race_time = timedelta(0)  # timedelta.min is negative, not gonna risk inconsistencies
 
     def __init__(self, code, name):
+        """
+        >>> Pilot("031","Fulano").name
+        'Fulano'
+        """
         self.name = name
         self.start_time = None
         self.end_time = None
@@ -34,7 +38,6 @@ class Pilot:
         return None
 
     def add_lap(self, lap_hour, lap_number, lap_duration, average_lap_speed):
-#        print ("add_lap: " +str(self.max_lap) + " " + str(lap_hour) + " " + str(lap_number) + " " + str(lap_duration.total_seconds()) + " " + str(average_lap_speed))
         if self.max_lap == int(lap_number) - 1: # Consecutive laps are enforced
             self.max_lap = int(lap_number)
             self.current_hour = lap_hour
@@ -100,6 +103,12 @@ class Pilot:
 
     @classmethod
     def best_lap_time(cls):
+        """
+        Returns the best lap time, by protected variable _best_overall_lap
+        >>> Pilot.best_lap_time()
+        Best lap time not yet calculated, run Pilot.update_finished()
+        datetime.timedelta(0)
+        """
         if Pilot._best_overall_lap < timedelta.max:
             return Pilot._best_overall_lap
         else:
@@ -108,6 +117,10 @@ class Pilot:
 
     @classmethod
     def total_time(cls):
+        """
+        >>> total_time(Pilot)
+        timedelta(0)
+        """
         if Pilot._total_race_time == timedelta(0):
             print(f'Total race time not yet calculated, run Pilot.update_finished()')
         return Pilot._total_race_time
@@ -127,6 +140,10 @@ class Pilot:
 
     @classmethod
     def best_lap(cls):
+        """
+        >>> Pilot.best_lap()
+        datetime.timedelta(999999999, 86399, 999999)
+        """
         return Pilot._best_overall_lap
 
     @classmethod
@@ -137,7 +154,7 @@ def parse_line(fline):
     """
     Transforms each text line in an array of typed elements. Excludes the "-".
     >>> parse_line("")
-    [None, '', '', '', 0, datetime.timedelta(0), 0.0]
+    [None, '', '', 0, datetime.timedelta(0), 0.0]
     >>> parse_line("23:49:08.277      038 - F.MASSA                           1            1:02.852                        44,275")
     [datetime.datetime(2019, 1, 1, 23, 49, 8, 277000), '038', 'F.MASSA', 1, datetime.timedelta(0, 62, 852000), 44.275]
     """
@@ -167,7 +184,12 @@ def parse_line(fline):
 
 
 def parse_date(datestring):
+    """
+    >>> parse_date("04:21:01.123")
+    datetime.datetime(2019, 1, 1, 4, 21, 1, 123000)
+    """
     return datetime.strptime(Pilot.nowPrefix+' '+datestring,"%Y-%m-%d %H:%M:%S.%f")
+
 
 def kartparser():
     """
@@ -213,19 +235,18 @@ def kartparser():
     # finished race. Let's update positions, best lap time, total race duration.
     Pilot.update_finished()
 
-    print(f'Posição\tHora de chegada\t\tCódigo\tNome\t\t\tVoltas\tMelhor Volta\tVelocidade Média Total\tTempo Total')
+    print(f'Posição\tHora de chegada\t\tCódigo\tNome\t\t\tVoltas\tMelhor Volta\tVelocidade Média Total\tTempo Total\tTempo após vencedor')
     for pilot in Pilot.all_pilots():
-        print( (str(pilot.position) if pilot.finished else "-") + "\t" + \
-            datetime.strftime(pilot.end_time,'%H:%M:%S.%f')[0:12] + \
-            '\t\t' + pilot.code + '\t' + \ pilot.name.ljust(20) + '\t' + str(pilot.max_lap) + \
-            '\t' + str(pilot.best_lap_time)[2:10] + '\t' + "{:.2f}".format(pilot.average_speed) + \
-            '\t\t\t' + str(pilot.total_time)[2:10])
+        tmp_pos = str(pilot.position) if pilot.finished else "-"
+        print( tmp_pos + "\t" + datetime.strftime(pilot.end_time,'%H:%M:%S.%f')[0:12] + '\t\t' + pilot.code + \
+        '\t' + pilot.name.ljust(20) + '\t' + str(pilot.max_lap) + '\t' + str(pilot.best_lap_time)[2:10] + \
+        '\t' + "{:.2f}".format(pilot.average_speed) + '\t\t\t' + str(pilot.total_time)[2:10] + '\t' + \
+        str(pilot.time_dif_first_place)[2:10])
     print(f'\n\nEstatísticas:\n')
     print(f'Melhor tempo de volta: ' + str(Pilot.best_lap())[2:10])
     print(f'Tempo total da corrida: ' + str(Pilot.total_time())[2:10])
 
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(kartparser())
